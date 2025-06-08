@@ -4,6 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
+// Create axios instance with baseURL based on environment
+const api = axios.create({
+  baseURL:
+    process.env.NODE_ENV === "production"
+      ? "/api"
+      : "http://localhost:5000/api",
+});
+
 export default function AdminLogin() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
@@ -14,14 +22,12 @@ export default function AdminLogin() {
     setError(""); // clear previous errors
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        form
-      );
+      const res = await api.post("/auth/login", form);
       console.log(res.data);
+
       if (res.data.success) {
         localStorage.setItem("admin-auth", res.data.token);
-        router.push("/admin/dashboard"); // navigate only if success
+        router.push("/admin/dashboard");
       } else {
         setError(res.data.message);
       }
